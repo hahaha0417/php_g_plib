@@ -1,5 +1,5 @@
 # [php] g_plib
-generator(point) library
+g_p library - generator(point)
 
 <br>
 <br>
