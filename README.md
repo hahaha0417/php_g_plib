@@ -1,4 +1,4 @@
-# g_plib
+# [php] g_plib
 generator(point) library
 
 <br>
