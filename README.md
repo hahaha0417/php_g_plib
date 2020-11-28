@@ -30,10 +30,7 @@ g_p library - generator(point)
 
 ## 目的
 不是為了蒐集所有的產生器，而是整理跟我相關的相關產生器
- 
-## 版權請看license
 
- 
 ## 方針
 > 優先順序(上面優先) 
 
@@ -47,3 +44,6 @@ g_p library - generator(point)
 
 
 
+
+ 
+## 版權請看license
