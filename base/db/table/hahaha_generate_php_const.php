@@ -60,7 +60,48 @@ class hahaha_generate_php_const
     }
 
     //-----------------------------------------------------------
-    public function Generate(&$content, &$database, &$output_path, &$output_namespace = "", $doctrine_style = false, &$pass_tables = ["migrates"])
+    public function Generate_Table(&$content, &$database, &$output_path, &$output_namespace = "", $doctrine_style = false, &$pass_tables = ["migrates"])
+    {
+        if(!is_dir($output_path)) 
+        {
+            mkdir($output_path, 0777, true);
+        }
+
+        $tables_ = preg_split('/\n|\r\n?\s*/', $content);
+
+        foreach ($tables_ as $key => &$table) 
+        {
+            $table_name = trim($table);
+            if (in_array($table, $pass_tables)) {
+                unset($tables_[$key]);
+            } 
+            else if (empty($table_name)) {
+                unset($tables_[$key]);
+            }        
+        } 
+
+        $text = [];
+        if($doctrine_style)
+        {
+            $name = str_replace(['_', '-'], [' ', ' '], $database);
+            $name = ucwords($name);
+            $name = str_replace([' ', '_', '-'], ['', '', ''], $name);
+            
+        }
+        else
+        {
+            $name = $database;
+        }
+        
+        $this->Generate_PHP_Const($text, $tables_, $output_namespace, $name); 
+        // 寫檔
+        $filename_ = $output_path . "/" . $name . ".php";
+        $output_content_ = implode("\r\n", $text);
+        file_put_contents($filename_ , $output_content_);
+        
+    }
+
+    public function Generate_Table_Field(&$content, &$database, &$output_path, &$output_namespace = "", $doctrine_style = false, &$pass_tables = ["migrates"])
     {
         if(!is_dir($output_path)) 
         {
