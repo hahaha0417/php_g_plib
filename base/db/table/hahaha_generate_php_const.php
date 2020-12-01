@@ -41,20 +41,26 @@ class hahaha_generate_php_const
     
     public $Ip_;
     public $Port_;
+	public $User_Name_;
+    public $Password_;
 	
     //-----------------------------------------------------------
     public function Initial()
     {
         $this->Ip_ = "127.0.0.1";
         $this->Port_ = "9000";
+		$this->User_Name_ = "root";
+		$this->Password_ = "hahaha";
 
         return $this;
     }
 
-    public function Initial_Setting(&$ip, &$port)
+    public function Initial_Setting(&$ip, &$port, &$username, &$password)
     {
         $this->Ip_ = &$ip;
         $this->Port_ = &$port;
+		$this->User_Name_ = $username;
+		$this->Password_ = $password;
 
         return $this;
     }
@@ -120,7 +126,7 @@ class hahaha_generate_php_const
             // ---------------------------------------------------
             $db_hahaha = new \hahahalib\hahaha_db_mysql;
             $db_result_hahaha = new \hahahalib\hahaha_db_mysql_result;
-            $db_hahaha->Connect("{$this->Ip_}:{$this->Port_}", "root", "hahaha", "{$database}");
+            $db_hahaha->Connect("{$this->Ip_}:{$this->Port_}", $this->User_Name_, $this->Password_, $database);
             $db_hahaha->Set_Names("utf8");
 
             // 查資料表欄位
