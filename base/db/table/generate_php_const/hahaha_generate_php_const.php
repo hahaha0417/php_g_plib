@@ -35,7 +35,7 @@ class xxx
 /*
 
 */
-class hahaha_generate_php_const_key
+class hahaha_generate_php_const_key 
 {
     const OUTPUT = "output"; 
     const PASS = "pass"; 
@@ -79,7 +79,25 @@ class hahaha_generate_php_const_key
     const DOCTRINE_STYLE = "doctrine_style"; 
 
 
+    const TOOL = "tool";
+    const GENERATE = "generate";
+    const DB_TABLE_PHP_CONST = "db_table_php_const";
+    const DB_TABLE_PHP_CONST_HA = "db_table_php_const_ha";
+    const REPLACE = "replace";
+    const MIGRATIONS = "migrations";
 
+    const HAHAHA = "hahaha";
+    const CONNECTIONS = "connections";
+    const MYSQL_BACKEND = "mysql_backend";
+    const HOST = "host";
+    const PORT = "port";
+    const USERNAME = "username";
+    const PASSWORD = "password";
+    const FROM = "from";
+    const TO = "to";
+
+
+    const ENABLED = "enabled";
     
     
 

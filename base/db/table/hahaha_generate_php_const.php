@@ -148,6 +148,7 @@ class hahaha_generate_php_const
     // --------------------------------------------- 
     // 設計
     // --------------------------------------------- 
+    // $config_output_ = &$config_generate_table_field_[key::OUTPUT];
     // $parameters_ = [
     //     // 輸出
     //     key::OUTPUT => [
@@ -157,12 +158,23 @@ class hahaha_generate_php_const
     //             key::NAME => $config_output_[key::CLASS_][key::NAME],
     //             key::STYLE => $config_output_[key::CLASS_][key::STYLE],
     //         ],
+    //         // ----------------------------------
+    //         // 可不填
+    //         // ----------------------------------
+    //         key::FIELDS => [
+    //             key::REPLACE => [
+    //                 "accounts" => "p_accounts",
+    //                 "p_" => "pp_",
+    //             ],
+    //         ],
+    //         // ----------------------------------
     //         key::INCLUDE_ALL => $config_output_[key::INCLUDE_ALL],
+
     //     ],
     //     // 略過
     //     key::PASS => [
     //         key::TABLES => [
-    //             key::MIGRATES,
+    //             key::MIGRATIONS,
     //         ],
     //     ],
     //     // 快速使用
@@ -252,6 +264,7 @@ class hahaha_generate_php_const
         $fast_uses_ = &$parameters[key::FAST_USES];
         $classes_ = &$parameters[key::CLASSES];
         $comments_ = &$parameters[key::COMMENTS];
+        
 
         if(!is_dir($output_[key::PATH])) 
         {
@@ -309,7 +322,7 @@ class hahaha_generate_php_const
                 $fields_[] = &$table;
             }
         }
-        
+
         
         // ----------------------------- 
         // style
@@ -565,12 +578,22 @@ class hahaha_generate_php_const
     //         key::CLASS_ => [
     //             key::STYLE => $config_output_[key::CLASS_][key::STYLE],
     //         ],
+    //         // ----------------------------------
+    //         // 可不填
+    //         // ----------------------------------
+    //         key::FIELDS => [
+    //             key::REPLACE => [
+    //                 // "accounts" => "p_accounts",
+    //                 // "p_" => "pp_",
+    //             ],
+    //         ],
+    //         // ----------------------------------
     //         key::INCLUDE_ALL => $config_output_[key::INCLUDE_ALL],
     //     ],
     //     // 略過
     //     key::PASS => [
     //         key::TABLES => [
-    //             key::MIGRATES,
+    //             key::MIGRATIONS,
     //         ],
     //     ],
     //     // 快速使用
@@ -896,6 +919,16 @@ class hahaha_generate_php_const
         $comments_const_class_ = &$comments_[key::CONST_CLASS];
         $comments_const_const_ = &$comments_[key::CONST_CONST];
 
+        //
+        $is_replace_field_ = false;
+        if(!empty($parameters[key::OUTPUT][key::FIELDS][key::REPLACE])) {
+            $replace_fields_ = &$parameters[key::OUTPUT][key::FIELDS][key::REPLACE];
+            $replace_from_ = array_keys($replace_fields_);
+            $replace_to_ = array_values($replace_fields_);
+            $is_replace_field_ = true;
+        }        
+        //
+
         // 因為產生器不會做得很複雜 & 需要一直改，所以可以簡單寫
         // 大的才要做特別整理
         $text[] = "<?php";
@@ -972,8 +1005,14 @@ class hahaha_generate_php_const
                     foreach ($settings[key::FIELDS_CLASS][$class] as $key_field => &$field) 
                     {
                         // const 
-                        $const = trim( strtoupper($field) );
+                        $field_temp_ = $field;
+                        if($is_replace_field_) 
+                        {
+                            $field_temp_ = str_replace($replace_from_, $replace_to_, $field_temp_);
+                        }     
+                        $const = trim( strtoupper($field_temp_) );
                         $const = str_replace([" ", "-"], ["_", "_"], $const);
+                                           
                         $text[] = "\tconst {$const} = \"{$field}\";";
                     }
                 }
@@ -992,7 +1031,12 @@ class hahaha_generate_php_const
         //
         foreach ($settings[key::FIELDS] as $key => &$field) 
         {
-            $const = trim( strtoupper($field) );
+            $field_temp_ = $field;
+            if($is_replace_field_) 
+            {
+                $field_temp_ = str_replace($replace_from_, $replace_to_, $field_temp_);
+            }     
+            $const = trim( strtoupper($field_temp_) );
             $const = str_replace([" ", "-"], ["_", "_"], $const);
             $text[] = "\tconst {$const} = \"{$field}\";";
         }
