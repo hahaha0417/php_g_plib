@@ -152,7 +152,7 @@ class hahaha_generate_php_const
     // $parameters_ = [
     //     // 輸出
     //     key::OUTPUT => [
-    //         key::NAMESPACE => $config_output_[key::NAMESPACE],
+    //         key::NAMESPACE_ => $config_output_[key::NAMESPACE_],
     //         key::PATH => $config_output_[key::PATH],
     //         key::CLASS_ => [
     //             key::NAME => $config_output_[key::CLASS_][key::NAME],
@@ -195,7 +195,7 @@ class hahaha_generate_php_const
     //     // 註解
     //     key::COMMENTS => [
     //         // ---------------------------------------------------------
-    //         key::NAMESPACE => [
+    //         key::NAMESPACE_ => [
     //             "/*",
     //             " ------------------------------------------------------ ",
     //             "說明",
@@ -264,6 +264,35 @@ class hahaha_generate_php_const
         $fast_uses_ = &$parameters[key::FAST_USES];
         $classes_ = &$parameters[key::CLASSES];
         $comments_ = &$parameters[key::COMMENTS];
+
+        // ---------------------------------------------------
+        $db_hahaha = new \hahahalib\hahaha_db_mysql;
+        $db_result_hahaha = new \hahahalib\hahaha_db_mysql_result;
+        $db_function_hahaha = new \hahahalib\hahaha_db_mysql_function;
+        $db_hahaha->Connect("{$this->Ip_}:{$this->Port_}", $this->User_Name_, $this->Password_, $database);
+        $db_hahaha->Set_Names("utf8");
+        // 查資料庫
+        $table_items_ = [];
+        $db_function_hahaha->Find_Db_Databases($db_hahaha, $db_result_hahaha, $table_items_, $database);
+
+        $db_hahaha->Close();
+        // ---------------------------------------------------
+        $tables_temp_ = [];
+        foreach ($tables as $key => &$table) 
+        {
+            foreach ($table_items_ as $key_table_item => &$table_item) 
+            {   
+                if($table_item["TABLE_NAME"] == $table)
+                {
+                    $tables_temp_[] = [
+                        key::NAME => &$table_item["TABLE_NAME"],
+                        key::COMMENT => &$table_item["TABLE_COMMENT"],
+                    ];
+                    break;
+                }
+                
+            } 
+        }
         
 
         if(!is_dir($output_[key::PATH])) 
@@ -271,15 +300,15 @@ class hahaha_generate_php_const
             mkdir($output_[key::PATH], 0777, true);
         }
 
-        $tables_ = &$tables;
+        $tables_ = &$tables_temp_;
 
         // ----------------------------- 
         // 過濾
         // ----------------------------- 
         foreach ($tables_ as $key => &$table) 
         {
-            $table_name = trim($table);
-            if (in_array($table, $pass_[key::TABLES])) {
+            $table_name = trim($table[key::NAME]);
+            if (in_array($table_name, $pass_[key::TABLES])) {
                 unset($tables_[$key]);
             } 
             else if (empty($table_name)) {
@@ -300,7 +329,7 @@ class hahaha_generate_php_const
             $is_class = false;
             foreach ($classes_ as $key_class => &$class) 
             {
-                $pos_ = strpos($table, $class);
+                $pos_ = strpos($table[key::NAME], $class);
 
                 if($pos_ === 0) 
                 {
@@ -450,7 +479,7 @@ class hahaha_generate_php_const
         // 處理
         // ----------------------------- 
         $settings_ = [
-            key::NAMESPACE => &$output_[key::NAMESPACE],
+            key::NAMESPACE_ => &$output_[key::NAMESPACE_],
             key::CLASS_ => &$name_,
             key::CLASSES => &$classes_,
             key::FIELDS_CLASS => &$fields_class_,
@@ -511,9 +540,10 @@ class hahaha_generate_php_const
             {
                 foreach ($fields as $key_item => &$item) 
                 {
-                    if ($key_item == "COLUMN_NAME") {
-                        $fields_[] = &$item;
-                    }
+                    $fields_[] = [
+                        key::NAME => &$fields["COLUMN_NAME"],
+                        key::COMMENT => &$fields["COLUMN_COMMENT"],
+                    ];
                 }
             }
 
@@ -548,7 +578,7 @@ class hahaha_generate_php_const
             $output_path, 
             $output_namespace, 
             $doctrine_style, 
-            $pass_tables,
+            $pass_tables
         );
 
     }
@@ -573,7 +603,7 @@ class hahaha_generate_php_const
     // $parameters_ = [
     //     // 輸出
     //     key::OUTPUT => [
-    //         key::NAMESPACE => $config_output_[key::NAMESPACE],
+    //         key::NAMESPACE_ => $config_output_[key::NAMESPACE_],
     //         key::PATH => $config_output_[key::PATH],
     //         key::CLASS_ => [
     //             key::STYLE => $config_output_[key::CLASS_][key::STYLE],
@@ -610,7 +640,7 @@ class hahaha_generate_php_const
     //     // 註解
     //     key::COMMENTS => [
     //         // ---------------------------------------------------------
-    //         key::NAMESPACE => [
+    //         key::NAMESPACE_ => [
     //             "/*",
     //             " ------------------------------------------------------ ",
     //             "說明",
@@ -686,6 +716,8 @@ class hahaha_generate_php_const
 
         $tables_ = &$tables;
 
+        $fast_use_strings_all_ = [];
+
         // ----------------------------- 
         // 過濾
         // ----------------------------- 
@@ -725,11 +757,10 @@ class hahaha_generate_php_const
             // -----------------------------
             $fields_temp_ = [];
             foreach ($table_fields as $key => &$fields) {
-                foreach ($fields as $key_item => &$item) {
-                    if ($key_item == "COLUMN_NAME") {
-                        $fields_temp_[] = &$item;
-                    }
-                }
+                $fields_temp_[] = [
+                    key::NAME => &$fields["COLUMN_NAME"],
+                    key::COMMENT => &$fields["COLUMN_COMMENT"],
+                ];
             }
 
             // ---------------------------------------------------
@@ -802,7 +833,7 @@ class hahaha_generate_php_const
                 {
                     if($first_)
                     {
-                        $first_ = false;
+                        $first_ = false; 
                         $temp_ .= $name_;
                     }
                     else
@@ -815,11 +846,11 @@ class hahaha_generate_php_const
                     if($first_)
                     {
                         $first_ = false;
-                        $temp_ .= strtolower($name_);
+                        $temp_ .= lcfirst($name_);
                     }
                     else
                     {
-                        $temp_ .= ucfirst(strtolower($name_));
+                        $temp_ .= $name_;
                     }
                 }
                 // 後綴
@@ -853,6 +884,8 @@ class hahaha_generate_php_const
 
                 // 存入
                 $fast_use_strings_[] = &$temp_;
+
+                $fast_use_strings_all_[$key_fast_use][] = &$temp_;
                 unset($temp_); 
             }
             
@@ -860,7 +893,7 @@ class hahaha_generate_php_const
             // 處理
             // ----------------------------- 
             $settings_ = [
-                key::NAMESPACE => &$output_[key::NAMESPACE],
+                key::NAMESPACE_ => &$output_[key::NAMESPACE_],
                 key::CLASS_ => &$name_,
                 key::FIELDS => &$fields_,
                 key::FAST_USES => &$fast_use_strings_,
@@ -872,7 +905,25 @@ class hahaha_generate_php_const
             $filename_ = $output_[key::PATH] . "/" . $name_ . ".php";
             $output_content_ = implode("\r\n", $text);
             file_put_contents($filename_ , $output_content_);
+
+            // ------------------------------------------------------ 
+            $this->Generate_Include_All($text, $settings_, $parameters); 
+            // 寫檔
+            $filename_ = $output_[key::PATH] . "/" . $name_ . ".php";
+            $output_content_ = implode("\r\n", $text);
+            file_put_contents($filename_ , $output_content_);
         } 
+
+
+        // ---------------------------------------------------------- 
+        $text = [];
+        $settings_[key::FAST_USES_ALL] = &$fast_use_strings_all_;
+
+        $this->Generate_Include_All($text, $settings_, $parameters); 
+        // 寫檔
+        $filename_ = $output_[key::PATH] . "/" . "include_all";
+        $output_content_ = implode("\r\n", $text);
+        file_put_contents($filename_ , $output_content_);
         
     }
 
@@ -912,7 +963,7 @@ class hahaha_generate_php_const
     {
         $fast_uses_ = &$settings[key::FAST_USES];
         $comments_ = &$settings[key::COMMENTS];
-        $comments_namespace_ = &$comments_[key::NAMESPACE];
+        $comments_namespace_ = &$comments_[key::NAMESPACE_];
         $classes_ = &$settings[key::CLASSES];
         $comments_class_ = &$comments_[key::CLASS_];
         $comments_const_ = &$comments_[key::CONST_];
@@ -933,7 +984,7 @@ class hahaha_generate_php_const
         // 大的才要做特別整理
         $text[] = "<?php";
         $text[] = "";
-        $text[] = "namespace {$settings[key::NAMESPACE]};";
+        $text[] = "namespace {$settings[key::NAMESPACE_]};";
         $text[] = "";
         // fast_use
         if(!empty($fast_uses_))
@@ -941,7 +992,7 @@ class hahaha_generate_php_const
             $text[] = "/*";
             foreach ($fast_uses_ as $key => &$fast_use) 
             {
-                $text[] = "use {$settings[key::NAMESPACE]}\\{$settings[key::CLASS_]} as {$fast_use}";
+                $text[] = "use {$settings[key::NAMESPACE_]}\\{$settings[key::CLASS_]} as {$fast_use};";
                 $text[] = "";
             }
             $text[] = "*/";
@@ -1005,15 +1056,18 @@ class hahaha_generate_php_const
                     foreach ($settings[key::FIELDS_CLASS][$class] as $key_field => &$field) 
                     {
                         // const 
-                        $field_temp_ = $field;
+                        $field_temp_ = $field[key::NAME];
                         if($is_replace_field_) 
                         {
                             $field_temp_ = str_replace($replace_from_, $replace_to_, $field_temp_);
                         }     
                         $const = trim( strtoupper($field_temp_) );
                         $const = str_replace([" ", "-"], ["_", "_"], $const);
-                                           
-                        $text[] = "\tconst {$const} = \"{$field}\";";
+                        if(!empty($field[key::COMMENT]))
+                        {
+                            $text[] = "\t// {$field[key::COMMENT]}";
+                        }                   
+                        $text[] = "\tconst {$const} = \"{$field[key::NAME]}\";";
                     }
                 }
             }
@@ -1031,18 +1085,54 @@ class hahaha_generate_php_const
         //
         foreach ($settings[key::FIELDS] as $key => &$field) 
         {
-            $field_temp_ = $field;
+            $field_temp_ = $field[key::NAME];
             if($is_replace_field_) 
             {
                 $field_temp_ = str_replace($replace_from_, $replace_to_, $field_temp_);
             }     
             $const = trim( strtoupper($field_temp_) );
             $const = str_replace([" ", "-"], ["_", "_"], $const);
-            $text[] = "\tconst {$const} = \"{$field}\";";
+            if(!empty($field[key::COMMENT]))
+            {
+                $text[] = "\t// {$field[key::COMMENT]}";
+            }
+            $text[] = "\tconst {$const} = \"{$field[key::NAME]}\";";
         }
         $text[] = "";
         $text[] = "} ";
         $text[] = "";
+
+    }
+
+    public function Generate_Include_All(&$text, &$settings, &$parameters) 
+    {
+        $fast_uses_all_ = &$settings[key::FAST_USES_ALL];
+        $comments_ = &$settings[key::COMMENTS];
+        $comments_namespace_ = &$comments_[key::NAMESPACE_];
+        $classes_ = &$settings[key::CLASSES];
+        $comments_class_ = &$comments_[key::CLASS_];
+        $comments_const_ = &$comments_[key::CONST_];
+        $comments_const_class_ = &$comments_[key::CONST_CLASS];
+        $comments_const_const_ = &$comments_[key::CONST_CONST];
+
+        //
+        $text[] = "";
+        $text[] = "";
+        // fast_use
+        if(!empty($fast_uses_all_))
+        {
+            foreach ($fast_uses_all_ as $key_fast_uses => &$fast_uses) 
+            {
+                $text[] = "/*";
+                foreach ($fast_uses as $key => &$fast_use) 
+                {
+                    $text[] = "use {$settings[key::NAMESPACE_]}\\{$settings[key::CLASS_]} as {$fast_use};";
+                }
+                $text[] = "*/";
+                $text[] = "";
+            }
+            
+        }
 
     }
 

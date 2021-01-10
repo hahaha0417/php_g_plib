@@ -41,6 +41,7 @@ class hahaha_generate_php_const_key
     const PASS = "pass"; 
     const FAST_USE = "fast_use"; 
     const FAST_USES = "fast_uses"; 
+    const FAST_USES_ALL = "fast_uses_all"; 
     const CLASS_ = "class"; 
     const CLASSES = "classes"; 
     const COMMENT = "comment"; 
@@ -48,7 +49,7 @@ class hahaha_generate_php_const_key
     const _COMMENTS = "_comments"; 
     const _ORDER = "_order"; 
 
-    const NAMESPACE = "namespace"; 
+    const NAMESPACE_ = "namespace"; 
     const NONE = "none"; 
     const PATH = "path"; 
     const NAME = "name"; 
