@@ -256,7 +256,7 @@ class hahaha_generate_php_const
     // --------------------------------------------- 
 
     // --------------------------------------------- 
-    
+        
     public function Generate_Table_Custom(&$tables, &$database, &$parameters = [])
     {
         $output_ = &$parameters[key::OUTPUT];
@@ -286,7 +286,8 @@ class hahaha_generate_php_const
                 {
                     $tables_temp_[] = [
                         key::NAME => &$table_item["TABLE_NAME"],
-                        key::COMMENT => &$table_item["TABLE_COMMENT"],
+                        // key::COMMENT => &$table_item["TABLE_COMMENT"],
+						key::COMMENT => str_replace("\n", "\n\t// ", $table_item["TABLE_COMMENT"]),
                     ];
                     break;
                 }
@@ -375,7 +376,7 @@ class hahaha_generate_php_const
         }
         else if($output_[key::CLASS_][key::STYLE] == key::PSR) 
         {
-            $name_ = str_replace(['_', '-'], [' ', ' '], $database);
+            $name_ = str_replace(['_', '-'], [' ', ' '], $name_);
             $name_ = ucwords($name_);
             $name_ = str_replace([' ', '_', '-'], ['', '', ''], $name_);
         }
@@ -499,7 +500,7 @@ class hahaha_generate_php_const
     public function Generate_Table_Custom_From_String(&$content, &$database, &$parameters = [])
     {
         $tables_ = preg_split('/\n|\r\n?\s*/', $content);
-
+ 
         $this->Generate_Table_Custom($tables_, $database, $parameters);
 
     }
@@ -708,7 +709,7 @@ class hahaha_generate_php_const
         $pass_ = &$parameters[key::PASS];
         $fast_uses_ = &$parameters[key::FAST_USES];
         $comments_ = &$parameters[key::COMMENTS];
-
+        $const_ = [];
         if(!is_dir($output_[key::PATH])) 
         {
             mkdir($output_[key::PATH], 0777, true);
@@ -791,7 +792,7 @@ class hahaha_generate_php_const
                 $name_ = ucwords($name_);
                 $name_ = str_replace([' ', '_', '-'], ['', '', ''], $name_);
             }
-
+            $const_[] = $name_;
             // ----------------------------- 
             // fast_use
             // ----------------------------- 
@@ -898,6 +899,7 @@ class hahaha_generate_php_const
                 key::FIELDS => &$fields_,
                 key::FAST_USES => &$fast_use_strings_,
                 key::COMMENTS => &$comments_,
+                key::CONST_ => $const_,
             ];
             
             $this->Generate_PHP_Const_Custom($text, $settings_, $parameters); 
@@ -907,11 +909,7 @@ class hahaha_generate_php_const
             file_put_contents($filename_ , $output_content_);
 
             // ------------------------------------------------------ 
-            $this->Generate_Include_All($text, $settings_, $parameters); 
-            // 寫檔
-            $filename_ = $output_[key::PATH] . "/" . $name_ . ".php";
-            $output_content_ = implode("\r\n", $text);
-            file_put_contents($filename_ , $output_content_);
+
         } 
 
 
@@ -1114,6 +1112,7 @@ class hahaha_generate_php_const
         $comments_const_ = &$comments_[key::CONST_];
         $comments_const_class_ = &$comments_[key::CONST_CLASS];
         $comments_const_const_ = &$comments_[key::CONST_CONST];
+        $const_ = &$settings[key::CONST_];
 
         //
         $text[] = "";
@@ -1126,7 +1125,7 @@ class hahaha_generate_php_const
                 $text[] = "/*";
                 foreach ($fast_uses as $key => &$fast_use) 
                 {
-                    $text[] = "use {$settings[key::NAMESPACE_]}\\{$settings[key::CLASS_]} as {$fast_use};";
+                    $text[] = "use {$settings[key::NAMESPACE_]}\\{$const_[$key]} as {$fast_use};";
                 }
                 $text[] = "*/";
                 $text[] = "";
