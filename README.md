@@ -8,7 +8,7 @@ g_p library - generator(point)
 <br>
 <br>
 
-<img src='https://github.com/hahaha0417/g_plib/blob/main/g_plib.png' width=100%>
+<img src='https://github.com/hahaha0417/g_plib/blob/master/g_plib.png' width=100%>
 
 
 <br>
